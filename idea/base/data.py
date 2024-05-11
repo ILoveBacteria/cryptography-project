@@ -1,8 +1,8 @@
-from idea.base.math import add, multiple
+from idea.base.math import add, multiple, xor
 
 
 class Block:
-    def __init__(self, data:int):
+    def __init__(self, data:bytes):
         self.data = data
     
     def __add__(self, other):
@@ -12,4 +12,7 @@ class Block:
         return Block(multiple(self.data, other.data))
 
     def __xor__(self, other):
-        return Block(self.data ^ other.data)
+        return Block(xor(self.data, other.data))
+    
+    def __len__(self):
+        return len(self.data)
