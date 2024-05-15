@@ -16,3 +16,6 @@ class Block:
     
     def __len__(self):
         return len(self.data)
+    
+    def __getitem__(self, key):
+        return Block(self.data[key])
