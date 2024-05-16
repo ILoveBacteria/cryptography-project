@@ -6,12 +6,11 @@ from idea.algorithm.round import round, final_round
 
 class IDEA:
     def __init__(self, plain_text:bytes, key:bytes) -> None:
-        if w := len(plain_text) % 8 == 0:
-            zero_padding = bytearray(0)
-        else:
+        if w := len(plain_text) % 8 != 0:
             zero_padding = bytearray(8 - w)
-        self.plain_text = plain_text + zero_padding
-        self.key = key
+            plain_text += zero_padding
+        self.plain_text = Block(plain_text)
+        self.key = Block(key)
 
     def generate_blocks_64bits(self) -> Generator[Block, None, None]:
         for i in range(0, len(self.plain_text), 8):
@@ -24,8 +23,21 @@ class IDEA:
     def encrypt(self) -> bytes:
         cipher_text = b''
         for block_64 in self.generate_blocks_64bits():
-            sub_block_16 = (block_64[0:2], block_64[2:4], block_64[4:6], block_64[6:8])
+            sub_block_16 = block_64.break_into_sub_blocks(2)
             for i in range(8):
                 sub_block_16 = round(sub_block_16, self.generate_sub_keys(i * 6))
-            cipher_text += b''.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
+            cipher_block = Block.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
+            cipher_text += cipher_block.data
+        return cipher_text
+    
+    def CBC_encrypt(self) -> bytes:
+        cipher_text = b''
+        last_cipher_block = Block(b'\x00' * 8)
+        for block_64 in self.generate_blocks_64bits():
+            block_64 = block_64 ^ last_cipher_block
+            sub_block_16 = block_64.break_into_sub_blocks(2)
+            for i in range(8):
+                sub_block_16 = round(sub_block_16, self.generate_sub_keys(i * 6))
+            last_cipher_block = Block.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
+            cipher_text += last_cipher_block.data
         return cipher_text
