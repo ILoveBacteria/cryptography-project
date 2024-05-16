@@ -1,5 +1,3 @@
-from typing import Generator
-
 from idea.base.data import Block
 from idea.algorithm.round import round, final_round
 
@@ -11,16 +9,20 @@ class IDEA:
             plain_text += zero_padding
         self.plain_text = Block(plain_text)
         self.key = Block(key)
+        self.sub_keys = self.generate_sub_keys(Block(key))
 
-    def generate_sub_keys(self, pre_shift:int) -> tuple[Block]:
-        shifted_key = int.from_bytes(self.key) << pre_shift
-        return (Block((shifted_key << i).to_bytes(2)) for i in range(6))
-    
+    def generate_sub_keys(self, key:Block) -> list[Block]:
+        sub_keys = []
+        while len(sub_keys) < 52:
+            sub_keys.extend(list(key.break_into_sub_blocks(2)))
+            key <<= 25
+        return sub_keys[:52]
+
     def _encrypt_block(self, block_64:Block) -> Block:
         sub_block_16 = tuple(block_64.break_into_sub_blocks(2))
         for i in range(8):
-            sub_block_16 = round(sub_block_16, self.generate_sub_keys(i * 6))
-        return Block.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
+            sub_block_16 = round(sub_block_16, self.sub_keys[i * 6:i * 6 + 6])
+        return Block.join(final_round(sub_block_16, self.sub_keys[48:]))
 
     def encrypt(self) -> bytes:
         cipher_text = b''
