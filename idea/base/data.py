@@ -1,4 +1,4 @@
-from typing import Iterable
+from typing import Generator, Iterable
 
 from idea.base.math import add, multiple, xor
 
@@ -8,14 +8,15 @@ class Block:
     def join(cls, blocks:Iterable['Block']) -> 'Block':
         return Block(b''.join(block.data for block in blocks))
     
-    def break_into_sub_blocks(self, size:int) -> tuple['Block']:
+    def break_into_sub_blocks(self, size:int) -> Generator['Block']:
         if size < 1:
             raise ValueError('Size must be greater than 0!')
         if size > len(self):
             raise ValueError('Size must be less than the length of the block!')
         if len(self) % size != 0:
             raise ValueError('Size must be a divisor of the length of the block!')
-        return tuple(Block(self.data[i:i + size]) for i in range(0, len(self), size))
+        for i in range(0, len(self), size):
+            yield Block(self.data[i:i + size])
 
     def __init__(self, data:bytes):
         self.data = data
