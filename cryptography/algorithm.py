@@ -3,6 +3,8 @@ from cryptography.utils import Block
 
 class MMA:
     def __init__(self, plain_text:bytes, key:bytes) -> None:
+        if len(key) != 16:
+            raise ValueError('Key must be 16 bytes long')
         if w := len(plain_text) % 8 != 0:
             zero_padding = bytearray(8 - w)
             plain_text += zero_padding
@@ -42,7 +44,7 @@ class MMA:
     def CTR_encrypt(self) -> bytes:
         cipher_text = b''
         for counter, block_64 in enumerate(self.plain_text.break_into_sub_blocks(8)):
-            cipher_counter = self._encrypt_block(counter.to_bytes(8))
+            cipher_counter = self._encrypt_block(counter.to_bytes(8), 'big')
             cipher_block = block_64 ^ cipher_counter
             cipher_text += cipher_block.data
         return cipher_text

@@ -6,7 +6,7 @@ class Block:
     def join(cls, blocks:Iterable['Block']) -> 'Block':
         return Block(b''.join(block.data for block in blocks))
     
-    def break_into_sub_blocks(self, size:int) -> Generator['Block']:
+    def break_into_sub_blocks(self, size:int) -> Generator['Block', None, None]:
         if size < 1:
             raise ValueError('Size must be greater than 0!')
         if size > len(self):
@@ -42,22 +42,22 @@ def add(d1:bytes, d2:bytes) -> bytes:
     if len(d1) != len(d2):
         raise ValueError('Two data must be the same size!')
     addition_modulo = 2 ** (len(d1) * 8)
-    return ((int.from_bytes(d1) + int.from_bytes(d2)) % addition_modulo).to_bytes(len(d1))
+    return ((int.from_bytes(d1, 'big') + int.from_bytes(d2, 'big')) % addition_modulo).to_bytes(len(d1), 'big')
 
 
 def multiple(d1:bytes, d2:bytes) -> bytes:
     if len(d1) != len(d2):
         raise ValueError('Two data must be the same size!')
     multiple_modulo = 2 ** (len(d1) * 8) + 1
-    return ((int.from_bytes(d1) + int.from_bytes(d2)) % multiple_modulo).to_bytes(len(d1))
+    return ((int.from_bytes(d1, 'big') + int.from_bytes(d2, 'big')) % multiple_modulo).to_bytes(len(d1), 'big')
 
 
 def xor(d1:bytes, d2:bytes) -> bytes:
     if len(d1) != len(d2):
         raise ValueError('Two data must be the same size!')
-    return (int.from_bytes(d1) ^ int.from_bytes(d2)).to_bytes(len(d1))
+    return (int.from_bytes(d1, 'big') ^ int.from_bytes(d2, 'big')).to_bytes(len(d1), 'big')
 
 
 def circular_left_shift(d:bytes, n:int) -> bytes:
-    d_int = int.from_bytes(d)
-    return ((d_int << n) | (d_int >> (len(d) - n))).to_bytes(len(d))
+    d_int = int.from_bytes(d, 'big')
+    return (((d_int << n) % (2 ** (len(d) * 8))) | (d_int >> (len(d) * 8 - n))).to_bytes(len(d), 'big')
