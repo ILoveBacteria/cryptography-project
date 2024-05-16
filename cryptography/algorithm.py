@@ -5,7 +5,7 @@ class MMA:
     def __init__(self, plain_text:bytes, key:bytes) -> None:
         if len(key) != 16:
             raise ValueError('Key must be 16 bytes long')
-        if w := len(plain_text) % 8 != 0:
+        if (w := len(plain_text) % 8) != 0:
             zero_padding = bytearray(8 - w)
             plain_text += zero_padding
         self.plain_text = Block(plain_text)
