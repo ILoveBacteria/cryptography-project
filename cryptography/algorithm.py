@@ -44,7 +44,7 @@ class MMA:
     def CTR_encrypt(self) -> bytes:
         cipher_text = b''
         for counter, block_64 in enumerate(self.plain_text.break_into_sub_blocks(8)):
-            cipher_counter = self._encrypt_block(counter.to_bytes(8), 'big')
+            cipher_counter = self._encrypt_block(Block(counter.to_bytes(8, 'big')))
             cipher_block = block_64 ^ cipher_counter
             cipher_text += cipher_block.data
         return cipher_text
