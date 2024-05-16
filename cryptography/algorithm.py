@@ -1,7 +1,7 @@
 from cryptography.utils import Block
 
 
-class IDEA:
+class MMA:
     def __init__(self, plain_text:bytes, key:bytes) -> None:
         if w := len(plain_text) % 8 != 0:
             zero_padding = bytearray(8 - w)
