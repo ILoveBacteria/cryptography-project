@@ -15,14 +15,17 @@ class IDEA:
     def generate_sub_keys(self, pre_shift:int) -> tuple[Block]:
         shifted_key = int.from_bytes(self.key) << pre_shift
         return (Block((shifted_key << i).to_bytes(2)) for i in range(6))
+    
+    def _encrypt_block(self, block_64:Block) -> Block:
+        sub_block_16 = tuple(block_64.break_into_sub_blocks(2))
+        for i in range(8):
+            sub_block_16 = round(sub_block_16, self.generate_sub_keys(i * 6))
+        return Block.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
 
     def encrypt(self) -> bytes:
         cipher_text = b''
         for block_64 in self.plain_text.break_into_sub_blocks(8):
-            sub_block_16 = tuple(block_64.break_into_sub_blocks(2))
-            for i in range(8):
-                sub_block_16 = round(sub_block_16, self.generate_sub_keys(i * 6))
-            cipher_block = Block.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
+            cipher_block = self._encrypt_block(block_64)
             cipher_text += cipher_block.data
         return cipher_text
     
@@ -31,9 +34,6 @@ class IDEA:
         last_cipher_block = Block(b'\x00' * 8)
         for block_64 in self.plain_text.break_into_sub_blocks(8):
             block_64 = block_64 ^ last_cipher_block
-            sub_block_16 = tuple(block_64.break_into_sub_blocks(2))
-            for i in range(8):
-                sub_block_16 = round(sub_block_16, self.generate_sub_keys(i * 6))
-            last_cipher_block = Block.join(final_round(sub_block_16, self.generate_sub_keys(8 * 6)))
+            last_cipher_block = self._encrypt_block(block_64)
             cipher_text += last_cipher_block.data
         return cipher_text
