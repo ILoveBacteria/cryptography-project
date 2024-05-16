@@ -1,6 +1,6 @@
 from typing import Generator, Iterable
 
-from idea.base.math import add, multiple, xor
+from idea.base.math import add, multiple, xor, circular_left_shift
 
 
 class Block:
@@ -35,3 +35,6 @@ class Block:
     
     def __getitem__(self, key):
         return Block(self.data[key])
+    
+    def __lshift__(self, other):
+        return Block(circular_left_shift(self.data, other))

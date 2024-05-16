@@ -16,3 +16,8 @@ def xor(d1:bytes, d2:bytes) -> bytes:
     if len(d1) != len(d2):
         raise ValueError('Two data must be the same size!')
     return (int.from_bytes(d1) ^ int.from_bytes(d2)).to_bytes(len(d1))
+
+
+def circular_left_shift(d:bytes, n:int) -> bytes:
+    d_int = int.from_bytes(d)
+    return ((d_int << n) | (d_int >> (len(d) - n))).to_bytes(len(d))
