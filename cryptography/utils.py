@@ -49,7 +49,7 @@ def multiple(d1:bytes, d2:bytes) -> bytes:
     if len(d1) != len(d2):
         raise ValueError('Two data must be the same size!')
     multiple_modulo = 2 ** (len(d1) * 8) + 1
-    return ((int.from_bytes(d1, 'big') + int.from_bytes(d2, 'big')) % multiple_modulo).to_bytes(len(d1), 'big')
+    return ((int.from_bytes(d1, 'big') * int.from_bytes(d2, 'big')) % multiple_modulo).to_bytes(len(d1), 'big')
 
 
 def xor(d1:bytes, d2:bytes) -> bytes:
