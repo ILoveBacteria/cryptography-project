@@ -1,7 +1,7 @@
 from cryptography.utils import Block
 
 
-class MMA:
+class MyCryptoAlgorithm:
     def __init__(self, plain_text:bytes, key:bytes) -> None:
         if len(key) != 16:
             raise ValueError('Key must be 16 bytes long')
