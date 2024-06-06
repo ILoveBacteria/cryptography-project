@@ -23,25 +23,24 @@ class MyHash:
     def encrypt(self) -> bytes:
         cipher_text = self.plain_text
         for _ in range(2 ** self.work_factor):
-            cipher_text = self.box(cipher_text, self.key) ^ self.salt
+            cipher_text = self.box(cipher_text, self.keys) ^ self.salt
         return cipher_text
-    
-    def box(self) -> Block:
-        cipher_text = self.plain_text
+
+    def box(self, input_64:Block, keys:list[Block]) -> Block:
         for i in range(32):
-            cipher_text = self.round(cipher_text, self.keys[i])
-        cipher_text = self.final_round(cipher_text, self.keys[i])
-        return cipher_text
+            input_64 = self.round(input_64, keys[i])
+        input_64 = self.final_round(input_64, keys)
+        return input_64
 
     def round(self, input_64:Block, key:Block) -> Block:
         left_32, right_32 = input_64[:4], input_64[4:]
         return Block.join(self.w(left_32 ^ key) ^ right_32, left_32)
 
-    def final_round(self, input_64:Block) -> Block:
+    def final_round(self, input_64:Block, keys:list[Block]) -> Block:
         left_32, right_32 = input_64[:4], input_64[4:]
-        return Block.join(right_32 ^ self.keys[31], left_32 ^ self.keys[30])
+        return Block.join(right_32 ^ keys[31], left_32 ^ keys[30])
 
-    def w(self, input_32):
+    def w(self, input_32:Block) -> Block:
         a = self.sbox[0].substitute(input_32[:1]) + self.sbox[1].substitute(input_32[1:2])
         b = self.sbox[2].substitute(input_32[2:3]) ^ a
         return self.sbox[3].substitute(input_32[3:]) + b

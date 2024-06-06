@@ -15,8 +15,8 @@ class S_Box:
 
 class Block:
     @classmethod
-    def join(cls, blocks:Iterable['Block']) -> 'Block':
-        return Block(b''.join(block.data for block in blocks))
+    def join(cls, *args) -> 'Block':
+        return Block(b''.join(block.data for block in args))
 
     def __init__(self, data:bytes):
         self.data = data
@@ -44,6 +44,9 @@ class Block:
     
     def __rshift__(self, other):
         return Block(right_shift(self.data, other))
+    
+    def __repr__(self) -> str:
+        return hex(int.from_bytes(self.data, 'big'))
     
 
 def add(d1:bytes, d2:bytes) -> bytes:
