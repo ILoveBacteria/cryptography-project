@@ -2,28 +2,21 @@ from hash.utils import Block, S_Box
 
 
 class MyHash:
-    def __init__(self, plain_text:bytes, keys:list[bytes], salt:bytes, work_factor:int, sbox:list[S_Box]) -> None:
-        if len(salt) != 8:
-            raise ValueError('Salt must be 8 bytes long')
-        if len(plain_text) != 8:
-            raise ValueError('Plain text must be 8 bytes long')
+    def __init__(self, keys:list[int], sbox:list[S_Box]) -> None:
         if len(keys) != 32:
             raise ValueError('Keys must be 32')
-        for key in keys:
-            if len(key) != 4:
-                raise ValueError('Each key must be 4 bytes long')
         if len(sbox) != 4:
             raise ValueError('S-Boxes must be 4')
-        self.plain_text = Block(plain_text)
+        keys = list(map(lambda x: x.to_bytes(4, 'big'), keys))
         self.keys = list(map(Block, keys))
-        self.salt = Block(salt)
-        self.work_factor = work_factor
         self.sbox = sbox
 
-    def encrypt(self) -> bytes:
-        cipher_text = self.plain_text
-        for _ in range(2 ** self.work_factor):
-            cipher_text = self.box(cipher_text, self.keys) ^ self.salt
+    def encrypt(self, plain_text:int, salt:int, work_factor:int) -> Block:
+        plain_text = Block(plain_text.to_bytes(8, 'big'))
+        salt = Block(salt.to_bytes(8, 'big'))
+        cipher_text = plain_text
+        for _ in range(2 ** work_factor):
+            cipher_text = self.box(cipher_text, self.keys) ^ salt
         return cipher_text
 
     def box(self, input_64:Block, keys:list[Block]) -> Block:
