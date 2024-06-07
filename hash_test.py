@@ -5,17 +5,9 @@ from hash.utils import S_Box, Block
 
 
 def main():
-    plain_text = b'12345678'
-    keys = [
-        0x243F6A88, 0x85A308D3, 0x13198A2E, 0x03707344,
-        0xA4093822, 0x299F31D0, 0x082EFA98, 0xEC4E6C89,
-        0x452821E6, 0x38D01377, 0xBE5466CF, 0x34E90C6C,
-        0xC0AC29B7, 0xC97C50DD, 0x3F84D5B5, 0xB5470917,
-        0x9216D5D9, 0x8979FB1B, 0x38D01377, 0xA4093822,
-        0xEC4E6C89, 0x243F6A88, 0x13198A2E, 0x85A308D3,
-        0x082EFA98, 0x85A308D3, 0xBE5466CF, 0x03707344,
-        0x243F6A88, 0x452821E6, 0x85A308D3, 0x38D01377,
-    ]
+    plain_text = (0x0).to_bytes(8, 'big')
+    keys = re.split(r',\s+', open('keys.txt').read().strip())
+    keys = list(map(lambda x: int(x, 16), keys))
     keys = list(map(lambda x: x.to_bytes(4, 'big'), keys))
 
     sbox_list = re.split(r'S-box \d\s+', open('sbox.txt').read().strip())[1:]
@@ -24,7 +16,7 @@ def main():
     
     my_hash = MyHash(plain_text=plain_text,
                      keys=keys,
-                     salt=b'12345678',
+                     salt=(0x701309b2b76e6e2d).to_bytes(8, 'big'),
                      work_factor=1,
                      sbox=sbox_list)
     print(my_hash.encrypt())
